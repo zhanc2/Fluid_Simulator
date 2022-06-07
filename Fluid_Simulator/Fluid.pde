@@ -17,11 +17,15 @@ class Fluid {
   }
   
   void updateLiquid(float g) {
-    for (FluidParticle fp : this.particles) {
-      fp.updatePosition();
-      fp.gravity(g);
-      fp.boundaries();
-      fp.display();
+    for (int i = 0; i < this.particles.size(); i++) {
+      this.particles.get(i).gravity(g);
+      this.particles.get(i).applyForces();
+      for (int j = i+1; j < this.particles.size(); j++) {
+        this.particles.get(i).collision(this.particles.get(j));
+      }
+      this.particles.get(i).boundaries();
+      this.particles.get(i).display();
+      //println(this.particles.get(i).pos.x, this.particles.get(i).pos.y);
     }
   }
   

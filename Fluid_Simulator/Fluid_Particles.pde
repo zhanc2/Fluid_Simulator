@@ -18,12 +18,71 @@ class FluidParticle {
     circle(this.pos.x, this.pos.y, this.size*2);
   }
   
-  void updatePosition() {
-    for (int i = 1; i < this.velocity.x; i++) {
-      
-    }
+  void applyForces() {
     this.pos.x += this.velocity.x;
     this.pos.y -= this.velocity.y;
+  }
+  
+  void collision(FluidParticle fp) {
+    
+    float xDis = fp.pos.x - this.pos.x;
+    float yDis = fp.pos.y - this.pos.y;
+    float disBetweenCenters = sqrt(xDis * xDis + yDis * yDis);
+    //println(disBetweenCenters);
+    
+    if (disBetweenCenters < 2*this.size) {
+      if (disBetweenCenters == 0) { //<>//
+        //this.pos.x = fp.pos.x - 2 * this.size;
+        //this.pos.y = fp.pos.y - 2 * this.size;
+        //println("?");
+        return;
+      }
+      float ratio = this.size / disBetweenCenters;
+      float xComponent = xDis * ratio;
+      float yComponent = yDis * ratio;
+      
+      float midX = this.pos.x + xDis/2;
+      float midY = this.pos.y + yDis/2;
+      
+      float averageVelocity = (this.velocity.mag() + fp.velocity.mag())/2.0;
+      
+      stroke(0);
+      strokeWeight(1);
+      line(this.pos.x, this.pos.y, fp.pos.x, fp.pos.y);
+      
+      this.pos.x = midX - xComponent;
+      this.pos.y = midY - yComponent;
+      this.setVelocity(averageVelocity);
+      //this.setVelocity(0,0);
+      
+      fp.setPos(midX + xComponent, midY + yComponent);
+      fp.setVelocity(averageVelocity);
+      //fp.setVelocity(0,0);
+      
+      //this.pos.x = fp.pos.x - 2 * xComponent;
+      //this.pos.y = fp.pos.y - 2 * yComponent;
+      
+    }
+    
+  }
+  
+  void setPos(float x, float y) {
+    this.pos.x = x;
+    this.pos.y = y;
+  }
+  
+  void setVelocity(float x, float y) {
+    this.velocity.x = x;
+    this.velocity.y = y;
+  }
+  
+  void setVelocity(float newVelocity) {
+    if(this.velocity.mag() == 0) {
+      return;
+    }
+    float ratio = newVelocity/this.velocity.mag();
+    this.velocity.x *= ratio;
+    this.velocity.y *= ratio;
   }
   
   void gravity(float g) {
@@ -36,8 +95,10 @@ class FluidParticle {
       if (this.velocity.x == 0) {
         this.velocity = xyFromDirVel(random(0, PI), this.velocity.y * 0.4);
       } else {
-        this.velocity.y *= -0.4;
-        this.velocity.x *= 0.99;
+        if (this.velocity.y < 0.05) this.velocity.y = 0;
+        else this.velocity.y *= -0.4;
+        if (this.velocity.x < 0.05) this.velocity.x = 0;
+        else this.velocity.x *= 0.99;
       }
     }
     if (this.pos.x + this.size > width) {

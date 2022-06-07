@@ -7,11 +7,19 @@ void setup() {
   size(500, 500);
   n = height;
   state = new boolean[n][n];
-  for (int i = 0; i < 100; i++) {
-    for (int j = 0; j < 100; j++) {
-      FluidParticle p = new FluidParticle(new PVector(100 + i, 100 + j), color(0, 0, 255), 1);
-      state[100 + i][100 + j] = true;
+  for (int i = 0; i < 5; i++) {
+    for (int j = 0; j < 5; j++) {
+      FluidParticle p = new FluidParticle(new PVector(50 + 50*j, 30 + 50*i), color(0, 0, 255), 20);
+      //state[100 + i][100 + j] = true;
       w.particles.add(p);
+    }
+  }
+}
+
+void keyPressed() {
+  if (key == ' ') {
+    for (FluidParticle fp : w.particles) {
+      println(fp.pos);
     }
   }
 }
@@ -19,5 +27,7 @@ void setup() {
 
 void draw () {
   background(255);
+  stroke(0);
+  fill(255);
   w.updateLiquid(1);
 }
