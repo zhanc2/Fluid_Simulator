@@ -16,6 +16,11 @@ class Fluid {
     this.particles = new ArrayList<FluidParticle>();
   }
   
+  void addLiquid(float x, float y) {
+    FluidParticle p = new FluidParticle(new PVector(x, y), color(0, 0, 255), this.sizeOfLiquidParticles);
+    this.particles.add(p);
+  }
+  
   void updateLiquid(float g) {
     for (int i = 0; i < this.particles.size(); i++) {
       this.particles.get(i).gravity(g);
