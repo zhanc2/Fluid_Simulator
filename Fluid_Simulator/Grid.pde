@@ -19,4 +19,25 @@ class Grid {
     this.add(i);
   }
   
+  void handleCells() {
+    for (int i = 0; i < cells.length; i++) {
+      for (int j = 0; j < cells.length; i++) {
+        handleCell(cells[i][j]);
+      }
+    }
+  }
+  
+  void handleCell(LinkedList l) {
+    Node current = l.head;
+    Node next;
+    while (current != null) {
+      next = current.next;
+      while (next != null) {
+        current.item.collision(next.item);
+        next = next.next;
+      }
+      current = current.next;
+    }
+  }
+  
 }

@@ -47,22 +47,23 @@ class FluidParticle {
       float xComponent = xDis * ratio;
       float yComponent = yDis * ratio;
       
-      float midX = this.pos.x + xDis/2;
-      float midY = this.pos.y + yDis/2;
+      //float midX = this.pos.x + xDis/2;
+      //float midY = this.pos.y + yDis/2;
       
-      float averageVelocity = (this.velocity.mag() + fp.velocity.mag())/2.0;
+      //float averageVelocity = (this.velocity.mag() + fp.velocity.mag())/2.0;
       
       stroke(0);
       strokeWeight(1);
-      //line(this.pos.x, this.pos.y, fp.pos.x, fp.pos.y);
+      line(this.pos.x, this.pos.y, fp.pos.x, fp.pos.y);
       
-      this.pos.x = midX - xComponent;
-      this.pos.y = midY - yComponent;
-      this.setVelocity(averageVelocity * 0.9);
-      //this.setVelocity(0,0);
+      //this.pos.x = midX - xComponent;
+      //this.pos.y = midY - yComponent;
+      this.setPos(fp.pos.x - 2 * xComponent, fp.pos.y - 2 * yComponent);
+      //this.setVelocity(averageVelocity * 0.9);
+      this.setVelocity(0,0);
       
-      fp.setPos(midX + xComponent, midY + yComponent);
-      fp.setVelocity(averageVelocity * 0.9);
+      //fp.setPos(midX + xComponent, midY + yComponent);
+      //fp.setVelocity(averageVelocity * 0.9);
       //fp.setVelocity(0,0);
       
       //this.pos.x = fp.pos.x - 2 * xComponent;
@@ -99,14 +100,10 @@ class FluidParticle {
     if (this.pos.y + this.size > height) {
       this.againstBoundary[1] = true;
       this.pos.y = height - this.size;
-      if (this.velocity.x == 0) {
-        this.velocity = xyFromDirVel(random(0, PI), this.velocity.y * 0.4);
-      } else {
-        if (this.velocity.y < 0.05) this.velocity.y = 0;
-        else this.velocity.y *= -0.4;
-        if (this.velocity.x < 0.05) this.velocity.x = 0;
-        else this.velocity.x *= 0.9;
-      }
+      if (abs(this.velocity.y) < 0.05) this.velocity.y = 0;
+      else {this.velocity.y *= -0.5;}
+      if (abs(this.velocity.x) < 0.05) this.velocity.x = 0;
+      else this.velocity.x *= 0.9;
     }
     if (this.pos.x + this.size > width) {
       this.pos.x = width - this.size;

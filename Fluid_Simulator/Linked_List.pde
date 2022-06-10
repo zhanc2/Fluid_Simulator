@@ -1,15 +1,5 @@
 class LinkedList {
   
-  class Node {
-    FluidParticle item;
-    Node next;
-    Node prev;
-    
-    Node(FluidParticle item) {
-      this.item = item;
-    }
-  }
-  
   Node head, tail = null;
   
   void addNode(FluidParticle i) {
