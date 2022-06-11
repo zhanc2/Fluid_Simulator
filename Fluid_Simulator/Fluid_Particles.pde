@@ -54,7 +54,7 @@ class FluidParticle {
       
       stroke(0);
       strokeWeight(1);
-      line(this.pos.x, this.pos.y, fp.pos.x, fp.pos.y);
+      //line(this.pos.x, this.pos.y, fp.pos.x, fp.pos.y);
       
       //this.pos.x = midX - xComponent;
       //this.pos.y = midY - yComponent;

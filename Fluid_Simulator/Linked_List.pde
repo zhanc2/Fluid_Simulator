@@ -1,5 +1,9 @@
 class LinkedList {
   
+  LinkedList() {
+    
+  }
+  
   Node head, tail = null;
   
   void addNode(FluidParticle i) {
@@ -21,6 +25,10 @@ class LinkedList {
   
   void removeNode(FluidParticle i) {
     if (this.head.item == i) {
+      if (this.head.next == null) {
+        this.head = null;
+        return;
+      }
       this.head.next.prev = null;
       this.head = this.head.next;
       return;
