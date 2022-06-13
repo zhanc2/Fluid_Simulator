@@ -39,13 +39,9 @@ class FluidParticle {
     float xDis = fp.pos.x - this.pos.x;
     float yDis = fp.pos.y - this.pos.y;
     float disBetweenCenters = sqrt(xDis * xDis + yDis * yDis);
-    //println(disBetweenCenters);
     
     if (disBetweenCenters < 2*this.size) {
       if (disBetweenCenters == 0) {
-        //this.pos.x = fp.pos.x - 2 * this.size;
-        //this.pos.y = fp.pos.y - 2 * this.size;
-        //println("?");
         return;
       }
       float ratio = this.size / disBetweenCenters;
@@ -54,7 +50,6 @@ class FluidParticle {
       
       //float midX = this.pos.x + xDis/2;
       //float midY = this.pos.y + yDis/2;
-      
       //float averageVelocity = (this.velocity.mag() + fp.velocity.mag())/2.0;
       
       stroke(0);
@@ -77,11 +72,7 @@ class FluidParticle {
       //fp.setPos(midX + xComponent, midY + yComponent);
       if (this.velocity.mag() == 0) fp.setVelocity(0);
       //fp.setVelocity(0,0);
-      
-      //this.pos.x = fp.pos.x - 2 * xComponent;
-      //this.pos.y = fp.pos.y - 2 * yComponent;
     }
-    
   }
   
   void setPos(float x, float y) {
@@ -112,7 +103,7 @@ class FluidParticle {
       this.againstBoundary[1] = true;
       this.pos.y = height - this.size;
       if (abs(this.velocity.y) < 1) this.velocity.y = 0;
-      else {this.velocity.y *= -0.3; this.velocity.x = random(-4,4);}
+      else {this.velocity.y *= -0.3;}
       if (abs(this.velocity.x) < 0.05) this.velocity.x = 0;
       else this.velocity.x *= 0.9;
     } else 

@@ -43,21 +43,22 @@ class Simulation {
   }
   
   void userAddingLiquids() {
-    if (selectedLiquid == 1 && addingLiquid) {
+    if (selectedLiquid > 0) {
       fill(255);
       stroke(0);
-      circle(mouseX, mouseY, addLiquidAmount*2*this.water.sizeOfLiquidParticles);
-      
+      circle(mouseX, mouseY, addLiquidAmount*4*this.water.sizeOfLiquidParticles);
+    }
+    if (selectedLiquid == 1 && addingLiquid) {
       if (timeSinceLastSpawn > 0.1*frameRate) {
-        if (addLiquidAmount == 1) {
+        if (addLiquidAmount == 0.5) {
           water.addLiquid(mouseX, mouseY, this.grid);
           ahh++;
           timeSinceLastSpawn = 0;
           return;
         }
-        for (int i = -addLiquidAmount; i < addLiquidAmount; i++) {
-          for (int j = -addLiquidAmount; j < addLiquidAmount; j++) {
-            if (i*i + j*j <= addLiquidAmount*addLiquidAmount) {water.addLiquid(mouseX+i*water.sizeOfLiquidParticles,mouseY+j*water.sizeOfLiquidParticles,this.grid);ahh++;}
+        for (int i = -round(addLiquidAmount); i < round(addLiquidAmount)+1; i++) {
+          for (int j = -round(addLiquidAmount); j < round(addLiquidAmount)+1; j++) {
+            if (i*i + j*j <= addLiquidAmount*addLiquidAmount) {water.addLiquid(mouseX+i*2*water.sizeOfLiquidParticles,mouseY+j*2*water.sizeOfLiquidParticles,this.grid);ahh++;}
           }
         }
         timeSinceLastSpawn = 0;
@@ -72,8 +73,10 @@ class Simulation {
       rect(min(drawingBlockStartingPos.x, mouseX), min(drawingBlockStartingPos.y, mouseY), abs(mouseX - drawingBlockStartingPos.x), abs(mouseY - drawingBlockStartingPos.y));
     } else {
       if (finishedBlock) {
-        Block b = new Block(new PVector(min(drawingBlockStartingPos.x, mouseX), min(drawingBlockStartingPos.y, mouseY)), new PVector(0,0), new PVector(abs(mouseX - drawingBlockStartingPos.x), abs(mouseY - drawingBlockStartingPos.y)), 10, 10, color(0));
-        this.blocks.add(b);
+        if (mouseX - drawingBlockStartingPos.x != 0 && mouseY - drawingBlockStartingPos.y != 0) {
+          Block b = new Block(new PVector(min(drawingBlockStartingPos.x, mouseX), min(drawingBlockStartingPos.y, mouseY)), new PVector(0,0), new PVector(abs(mouseX - drawingBlockStartingPos.x), abs(mouseY - drawingBlockStartingPos.y)), 10, 10, color(0));
+          this.blocks.add(b);
+        }
         finishedBlock = false;
       }
     }

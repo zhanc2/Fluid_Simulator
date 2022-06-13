@@ -48,19 +48,19 @@ class Grid {
           l.get(i).collision(l.get(j), false);
           l.get(i).boundaries();
         }
-        //for (int u = -1; u < 2; u++) {
-        //  for (int  v = -1; v < 2; v++) {
-        //    if (u != 0 && v != 0) {
-        //      try {
-        //        for (int j = 0; j < cells[iIndex+u][jIndex+v].size(); j++) {
-        //          l.get(i).collision(cells[iIndex+u][jIndex+v].get(j), false);
-        //          l.get(i).boundaries();
-        //        }
-        //      }
-        //      catch (Exception e) {}
-        //    }
-        //  }
-        //}
+        for (int u = -1; u < 2; u++) {
+          for (int  v = -1; v < 2; v++) {
+            if (u != 0 && v != 0) {
+              try {
+                for (int j = 0; j < cells[iIndex+u][jIndex+v].size(); j++) {
+                  l.get(i).collision(cells[iIndex+u][jIndex+v].get(j), false);
+                  l.get(i).boundaries();
+                }
+              }
+              catch (Exception e) {}
+            }
+          }
+        }
         l.get(i).boundaries();
       }
       l.get(i).display();

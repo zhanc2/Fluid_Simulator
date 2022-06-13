@@ -1,24 +1,45 @@
 void mousePressed() {
   if (selectedLiquid > 0) addingLiquid = true;
-  if (blockMakerMode) {drawingBlock = true; drawingBlockStartingPos = new PVector(mouseX, mouseY);}
+  if (blockMakerMode) {
+    for (Block b : s.blocks) {
+      if (b.pos.x < mouseX && b.pos.x + b.size.x > mouseX && b.pos.y < mouseY && b.pos.y + b.size.y > mouseY) {
+        b.pickedUp = true;
+        b.pickedUpPosition.x = mouseX - b.pos.x;
+        b.pickedUpPosition.y = mouseY - b.pos.y;
+        b.prevMousePos.x = mouseX;
+        b.prevMousePos.y = mouseY;
+        holdingBlock = b;
+        println("DO SOMETHING");
+        return;
+      }
+    }
+    startedBlock = true;
+    drawingBlock = true; 
+    drawingBlockStartingPos = new PVector(mouseX, mouseY);
+  }
 }
 
 
 void mouseReleased() {
   if (selectedLiquid > 0) addingLiquid = false;
-  if (blockMakerMode) {drawingBlock = false; finishedBlock = true;}
+  if (blockMakerMode) {
+    if (holdingBlock != null) {
+      holdingBlock.pickedUp = false;
+      holdingBlock = null;
+      return;
+    }
+    drawingBlock = false;
+    if (startedBlock) finishedBlock = true;
+    startedBlock = false;
+  }
 }
 
 void keyPressed() {
   if (key == ' ') {
-    //for (FluidParticle fp : s.water.particles) {
-    //  println(fp.pos);
-    //}
     paused = !paused;
   }
   
   if (key == 'c') {
-    //s.water.particles.clear();
     for (int i = 0; i < s.grid.cells.length; i++) {
       for (ArrayList<FluidParticle> a : s.grid.cells[i]) {
         a.clear();
