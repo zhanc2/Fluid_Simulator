@@ -24,12 +24,17 @@ class FluidParticle {
     circle(this.pos.x, this.pos.y, this.size*2);
   }
   
-  void applyForces() {
-    this.pos.x += this.velocity.x;
-    this.pos.y -= this.velocity.y;
+  void update(float gravity, float ssA) {
+    this.gravity(gravity/ssA);
+    this.applyForces(ssA);
   }
   
-  void collision(FluidParticle fp) {
+  void applyForces(float ssA) {
+    this.pos.x += this.velocity.x / ssA;
+    this.pos.y -= this.velocity.y / ssA;
+  }
+  
+  void collision(FluidParticle fp, boolean recursed) {
     
     float xDis = fp.pos.x - this.pos.x;
     float yDis = fp.pos.y - this.pos.y;
@@ -37,7 +42,7 @@ class FluidParticle {
     //println(disBetweenCenters);
     
     if (disBetweenCenters < 2*this.size) {
-      if (disBetweenCenters == 0) { //<>//
+      if (disBetweenCenters == 0) {
         //this.pos.x = fp.pos.x - 2 * this.size;
         //this.pos.y = fp.pos.y - 2 * this.size;
         //println("?");
@@ -58,17 +63,23 @@ class FluidParticle {
       
       //this.pos.x = midX - xComponent;
       //this.pos.y = midY - yComponent;
+      //if (this.pos.y > height - this.size - 5 && fp.pos.y - 2 * yComponent > height - this.size && abs(fp.velocity.x) < 1) {
+      //  //fp.collision(this, true);
+      //  fp.setPos(fp.pos.x,this.pos.y - 2 * this.size); //<>// //<>//
+      //  //fp.setVelocity(0);
+      //} else {
+      //  this.setPos(fp.pos.x - 2 * xComponent, fp.pos.y - 2 * yComponent); //<>// //<>//
+      //}
       this.setPos(fp.pos.x - 2 * xComponent, fp.pos.y - 2 * yComponent);
       //this.setVelocity(averageVelocity * 0.9);
-      this.setVelocity(0,0);
+      //this.setVelocity(0,0);
       
       //fp.setPos(midX + xComponent, midY + yComponent);
-      //fp.setVelocity(averageVelocity * 0.9);
+      if (this.velocity.mag() == 0) fp.setVelocity(0);
       //fp.setVelocity(0,0);
       
       //this.pos.x = fp.pos.x - 2 * xComponent;
       //this.pos.y = fp.pos.y - 2 * yComponent;
-      
     }
     
   }
@@ -100,21 +111,30 @@ class FluidParticle {
     if (this.pos.y + this.size > height) {
       this.againstBoundary[1] = true;
       this.pos.y = height - this.size;
-      if (abs(this.velocity.y) < 0.05) this.velocity.y = 0;
-      else {this.velocity.y *= -0.5;}
+      if (abs(this.velocity.y) < 1) this.velocity.y = 0;
+      else {this.velocity.y *= -0.3; this.velocity.x = random(-4,4);}
       if (abs(this.velocity.x) < 0.05) this.velocity.x = 0;
       else this.velocity.x *= 0.9;
-    }
+    } else 
+      this.againstBoundary[1] = false;
     if (this.pos.x + this.size > width) {
-      this.pos.x = width - this.size;
+      if (this.pos.y < height-this.size-5) {
+        this.pos.x = width - this.size - 2;
+      } else {
+        this.pos.x = width - this.size;
+      }
       this.velocity.x = 0;
       this.againstBoundary[2] = true;
-    }
+    } else this.againstBoundary[2] = false;
     if (this.pos.x - this.size < 0) {
-      this.pos.x = this.size;
+      if (this.pos.y < height-this.size-5) {
+        this.pos.x = this.size + 2;
+      } else {
+        this.pos.x = this.size;
+      }
       this.velocity.x = 0;
       this.againstBoundary[0] = true;
-    }
+    } else this.againstBoundary[0] = false;
   }
   
   PVector xyFromDirVel(float d, float v) {

@@ -16,6 +16,13 @@ class Block {
     this.c = C;
   }
   
+  void update(float g) {
+    this.gravity(g);
+    this.updatePosition();
+    this.boundaries();
+    this.display();
+  }
+  
   void display() {
     rect(this.pos.x, this.pos.y, this.size.x, this.size.y);
   }
@@ -29,4 +36,22 @@ class Block {
     this.velocity.y -= g;
   }
   
+  void boundaries() {
+    if (this.pos.y + this.size.y > height) {
+      this.pos.y = height - this.size.y;
+      this.velocity.y = 0;
+    }
+    if (this.pos.x + this.size.x > width) {
+      this.pos.x = width - this.size.x;
+    }
+    else if (this.pos.x < 0) {
+      this.pos.x = 0;
+    }
+  }
+  
+  void collision(Block b) {
+    
+    
+    
+  }
 }
