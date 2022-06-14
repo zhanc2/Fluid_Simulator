@@ -44,9 +44,11 @@ class Grid {
       for (int k = 0; k < subStepAmount; k++) {
         l.get(i).update(gravity, subStepAmount);
         this.updateCellPosition(l.get(i));
-        for (int j = i+1; j < l.size(); j++) {
-          l.get(i).collision(l.get(j), false);
-          l.get(i).boundaries();
+        for (int j = 0; j < l.size(); j++) {
+          if (i != j) {
+            l.get(i).collision(l.get(j), false);
+            l.get(i).boundaries();
+          }
         }
         for (int u = -1; u < 2; u++) {
           for (int  v = -1; v < 2; v++) {

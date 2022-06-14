@@ -13,7 +13,7 @@ class Simulation {
     this.gravity = 1;
     this.timeSinceLastSpawn = 60;
     
-    this.water = new Fluid(1, 1, 10, color(0, 0, 255));
+    this.water = new Fluid(1, 1, 1, color(0, 0, 255));
     this.grid = new Grid(20);
     
     this.blocks = new ArrayList<Block>();
@@ -31,8 +31,8 @@ class Simulation {
   void run() {
     this.userAddingLiquids();
     this.liquids();
-    this.userAddingBlocks();
     this.blocks();
+    this.userAddingBlocks();
   }
   
   void liquids() {
@@ -41,8 +41,18 @@ class Simulation {
   
   void blocks() {
     for (int i = 0; i < this.blocks.size(); i++) {
-      if (this.blocks.size() > 1 && i != this.blocks.size()-1) this.blocks.get(i).update(this.gravity, new ArrayList<Block>(this.blocks.subList(i+1, this.blocks.size()-1)));
-      else this.blocks.get(i).update(this.gravity, new ArrayList<Block>());
+      for (int s = 0; s < subStepAmount; s++) {
+        this.blocks.get(i).move();
+        this.blocks.get(i).gravity(this.gravity/2);
+        this.blocks.get(i).updatePosition(subStepAmount);
+        for (int j = 0; j < this.blocks.size(); j++) {
+          if (j != i) {
+            this.blocks.get(i).collision(this.blocks.get(j));
+          }
+        }
+        this.blocks.get(i).boundaries();
+      }
+      this.blocks.get(i).display();
     }
   }
   
@@ -73,17 +83,40 @@ class Simulation {
   
   void userAddingBlocks() {
     if (drawingBlock) {
-      fill(0);
+      validBlockLocation = true;
+      for (Block b : this.blocks) {
+        if (blockCollision(min(drawingBlockStartingPos.x, mouseX), min(drawingBlockStartingPos.y, mouseY), abs(mouseX - drawingBlockStartingPos.x), abs(mouseY - drawingBlockStartingPos.y), b.pos.x, b.pos.y, b.size.x, b.size.y)) {
+          strokeWeight(0);
+          fill(255,0,0, 170);
+          validBlockLocation = false;
+        }
+      }
+      if (validBlockLocation) {
+        fill(0);
+        stroke(0);
+        strokeWeight(1);
+      }
       rect(min(drawingBlockStartingPos.x, mouseX), min(drawingBlockStartingPos.y, mouseY), abs(mouseX - drawingBlockStartingPos.x), abs(mouseY - drawingBlockStartingPos.y));
     } else {
       if (finishedBlock) {
         if (mouseX - drawingBlockStartingPos.x != 0 && mouseY - drawingBlockStartingPos.y != 0) {
+          
+          if (!validBlockLocation) {
+            finishedBlock = false;
+            return;
+          }
+          
           Block b = new Block(new PVector(min(drawingBlockStartingPos.x, mouseX), min(drawingBlockStartingPos.y, mouseY)), new PVector(0,0), new PVector(abs(mouseX - drawingBlockStartingPos.x), abs(mouseY - drawingBlockStartingPos.y)), 10, 10, color(0));
           this.blocks.add(b);
         }
         finishedBlock = false;
       }
     }
+  }
+  
+  boolean blockCollision(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2) {
+    if (x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2) return true;
+    return false;
   }
   
 }

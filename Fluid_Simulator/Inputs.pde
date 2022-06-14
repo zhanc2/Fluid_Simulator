@@ -9,7 +9,6 @@ void mousePressed() {
         b.prevMousePos.x = mouseX;
         b.prevMousePos.y = mouseY;
         holdingBlock = b;
-        println("DO SOMETHING");
         return;
       }
     }
