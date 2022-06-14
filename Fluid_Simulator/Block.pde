@@ -23,10 +23,10 @@ class Block {
     this.prevMousePos = new PVector(0,0);
   }
   
-  void update(float g) {
+  void update(float g, ArrayList<Block> blocks) {
     this.move();
     this.gravity(g);
-    this.updatePosition();
+    this.updatePosition(blocks);
     this.boundaries();
     this.display();
   }
@@ -40,10 +40,19 @@ class Block {
     
   }
   
-  void updatePosition() {
+  void updatePosition(ArrayList<Block> blocks) {
     if (!pickedUp) {
       this.pos.x += this.velocity.x;
       this.pos.y -= this.velocity.y;
+      
+      println(blocks.size());
+      for (Block b : blocks) {
+        if (this.collision(b)) {
+          this.pos.x -= this.velocity.x;
+          this.pos.y += this.velocity.y;
+          println("hi");
+        }
+      }
     }
   }
   
@@ -70,17 +79,33 @@ class Block {
     }
   }
   
-  void collision(Block b) {
+  boolean collision(Block b) {
     
-    if (this.velocity.x == 0 && this.velocity.y == 0) {
-      if (this.pos.x + this.size.x > b.pos.x && this.pos.x +this.size.x < b.pos.x + b.size.x) {
-        //if (this.
+    if ((this.pos.x + this.size.x > b.pos.x && this.pos.x +this.size.x < b.pos.x + b.size.x) || (this.pos.x < b.pos.x + b.size.x && this.pos.x > b.pos.x)) {
+      if ((this.pos.y + this.size.y > b.pos.y && this.pos.y +this.size.y < b.pos.y + b.size.y) || (this.pos.y < b.pos.y + b.size.y && this.pos.y > b.pos.y)) {
+        return true;
       }
-    } else if (b.velocity.x == 0 && b.velocity.y == 0) {
-      
-    } else {
-      
     }
+    return false;
+    
+    //if (this.velocity.x == 0 && this.velocity.y == 0) {
+      
+    //} else if (b.velocity.x == 0 && b.velocity.y == 0) {
+    //  if (this.pos.x + this.size.x > b.pos.x && this.pos.x +this.size.x < b.pos.x + b.size.x && this.pos.x < b.pos.x + b.size.x && this.pos.x > b.pos.x) {
+    //    if (this.pos.y + this.size.y > b.pos.y && this.pos.y + this.size.y < b.pos.y + b.size.y) {
+    //      if (this.velocity.x == 0) {
+    //        this.pos.y = b.pos.y - this.size.y;
+    //      }
+    //    }
+    //    //if (this.pos.
+    //  } else if(this.pos.x < b.pos.x + b.size.x && this.pos.x > b.pos.x) {
+        
+    //  } else if (this.pos.x + this.size.x > b.pos.x && this.pos.x +this.size.x < b.pos.x + b.size.x) {
+        
+    //  }
+    //} else {
+      
+    //}
     
   }
   

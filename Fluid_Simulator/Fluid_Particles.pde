@@ -65,10 +65,10 @@ class FluidParticle {
       //} else {
       //  this.setPos(fp.pos.x - 2 * xComponent, fp.pos.y - 2 * yComponent); //<>// //<>//
       //}
-      this.setPos(fp.pos.x - 2 * xComponent, fp.pos.y - 2 * yComponent);
+      this.setPos(fp.pos.x - 2 * xComponent, fp.pos.y - 2 * yComponent); //<>//
       //this.setVelocity(averageVelocity * 0.9);
       //this.setVelocity(0,0);
-      
+       //<>//
       //fp.setPos(midX + xComponent, midY + yComponent);
       if (this.velocity.mag() == 0) fp.setVelocity(0);
       //fp.setVelocity(0,0);

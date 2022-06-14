@@ -3,6 +3,7 @@ class Simulation {
   Fluid water;
   float gravity;
   Grid grid;
+  FluidParticle[][] state;
   
   ArrayList<Block> blocks;
   
@@ -16,6 +17,8 @@ class Simulation {
     this.grid = new Grid(20);
     
     this.blocks = new ArrayList<Block>();
+    
+    this.state = new FluidParticle[n][n];
     
     //for (int i = 0; i < 7; i++) {
     //  for (int j = 0; j < 7; j++) {
@@ -37,8 +40,9 @@ class Simulation {
   }
   
   void blocks() {
-    for (Block b : this.blocks) {
-      b.update(this.gravity);
+    for (int i = 0; i < this.blocks.size(); i++) {
+      if (this.blocks.size() > 1 && i != this.blocks.size()-1) this.blocks.get(i).update(this.gravity, new ArrayList<Block>(this.blocks.subList(i+1, this.blocks.size()-1)));
+      else this.blocks.get(i).update(this.gravity, new ArrayList<Block>());
     }
   }
   

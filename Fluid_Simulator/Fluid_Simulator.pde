@@ -13,18 +13,19 @@ boolean finishedBlock;
 Block holdingBlock;
 PVector drawingBlockStartingPos;
 
+ArrayList<Integer> yes;
 
 int ahh;
 
 void setup() {
   size(400, 400);
-  selectedLiquid = 1;
+  selectedLiquid = 0;
   addingLiquid = false;
   n = height;
   paused = false;
   addLiquidAmount = 0.5;
   subStepAmount = 5;
-  blockMakerMode = false;
+  blockMakerMode = true;
   drawingBlock = false;
   startedBlock = false;
   finishedBlock = false;
