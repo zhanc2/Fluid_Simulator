@@ -20,13 +20,13 @@ int ahh;
 
 void setup() {
   size(500, 500);
-  selectedLiquid = 1;
+  selectedLiquid = 0;
   addingLiquid = false;
   n = height;
   paused = false;
   addLiquidAmount = 5;
   subStepAmount = 5;
-  blockMakerMode = false;
+  blockMakerMode = true;
   drawingBlock = false;
   startedBlock = false;
   finishedBlock = false;

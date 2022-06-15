@@ -9,6 +9,11 @@ void mousePressed() {
         b.prevMousePos.x = mouseX;
         b.prevMousePos.y = mouseY;
         holdingBlock = b;
+        
+        Block temp = b;
+        s.blocks.remove(b);
+        s.blocks.add(0, temp);
+        
         return;
       }
     }
