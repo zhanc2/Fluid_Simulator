@@ -3,7 +3,8 @@ class Simulation {
   Fluid water;
   float gravity;
   Grid grid;
-  FluidParticle[][] state;
+  FluidParticle[][] fluidState;
+  FluidParticle[][] nextState;
   
   ArrayList<Block> blocks;
   
@@ -18,7 +19,8 @@ class Simulation {
     
     this.blocks = new ArrayList<Block>();
     
-    this.state = new FluidParticle[n][n];
+    this.fluidState = new FluidParticle[n][n];
+    this.nextState = new FluidParticle[n][n];
     
     //for (int i = 0; i < 7; i++) {
     //  for (int j = 0; j < 7; j++) {
@@ -30,9 +32,11 @@ class Simulation {
   
   void run() {
     this.userAddingLiquids();
-    this.liquids();
+    //this.liquids();
     this.blocks();
     this.userAddingBlocks();
+    this.updateFluidState();
+    this.copyNextState();
   }
   
   void liquids() {
@@ -56,23 +60,81 @@ class Simulation {
     }
   }
   
+  void updateFluidState() {
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (this.fluidState[i][j] == null) continue;
+        //this.fluidState[i][j].display();
+        fill(0,0,255);
+        strokeWeight(0);
+        circle(i, j, this.fluidState[i][j].size);
+        this.fluidState[i][j].gravity(this.gravity);
+        PVector roundedVelocity = new PVector(int(this.fluidState[i][j].velocity.x), int(this.fluidState[i][j].velocity.y));
+        int xAmount = 0, yAmount = 0;
+        while (abs(roundedVelocity.x) > 0) {
+          if (!(i + xAmount < n-1 && i + xAmount > 0)) break;
+          if (!(abs(xAmount) <= abs(roundedVelocity.x))) {break;}
+          xAmount += 1 +(-2 * int(roundedVelocity.x < 0));
+          if (this.fluidState[i+xAmount][j] != null) break;
+          //if (this.fluidState[i+xAmount][j] == null) {
+          //  this.nextState[int(this.fluidState[i][j].pos.x)][int(this.fluidState[i][j].pos.y)] = null;
+          //  this.fluidState[i][j].pos.x += 1 + 2*(-1 * int(this.fluidState[i][j].velocity.x < 0));
+          //  this.fluidState[i][j].pos.y += 1 + 2*(-1 * int(this.fluidState[i][j].velocity.y < 0));
+          //  this.nextState[int(this.fluidState[i][j].pos.x)][int(this.fluidState[i][j].pos.y)] = this.fluidState[i][j];
+          //} else break;
+        }
+        while (abs(roundedVelocity.y) > 0) {
+          if (!(j - yAmount < n-1 && j - yAmount > 0)) break;
+          if (!(abs(yAmount) <= abs(roundedVelocity.y))) break;
+          yAmount += 1 + (-2 * int(roundedVelocity.y < 0));
+          if (this.fluidState[i][j-yAmount] != null) break;
+        }
+        //if (xAmount == yAmount && xAmount == 0) return;
+        this.nextState[i][j] = null;
+        this.fluidState[i][j].pos.x += xAmount;
+        this.fluidState[i][j].pos.y -= yAmount;
+        this.nextState[i+xAmount][j-yAmount] = this.fluidState[i][j];
+      }
+    }
+  }
+  
+  void copyNextState() {
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        this.fluidState[i][j] = this.nextState[i][j];
+      }
+    }
+  }
+  
+  void addFluidToState(FluidParticle f) {
+    if (f.pos.x > -1 && f.pos.x < n && f.pos.y > 0 && f.pos.y < n) {
+      if (this.nextState[int(f.pos.x)][int(f.pos.y)] == null) {
+        this.nextState[int(f.pos.x)][int(f.pos.y)] = f;
+      } 
+    } 
+  }
+  
   void userAddingLiquids() {
     if (selectedLiquid > 0) {
       fill(255);
       stroke(0);
+      strokeWeight(1);
       circle(mouseX, mouseY, addLiquidAmount*4*this.water.sizeOfLiquidParticles);
     }
     if (selectedLiquid == 1 && addingLiquid) {
       if (timeSinceLastSpawn > 0.1*frameRate) {
         if (addLiquidAmount == 0.5) {
-          water.addLiquid(mouseX, mouseY, this.grid);
+          this.addFluidToState(water.createLiquid(mouseX,mouseY));
           ahh++;
           timeSinceLastSpawn = 0;
           return;
         }
         for (int i = -round(addLiquidAmount); i < round(addLiquidAmount)+1; i++) {
           for (int j = -round(addLiquidAmount); j < round(addLiquidAmount)+1; j++) {
-            if (i*i + j*j <= addLiquidAmount*addLiquidAmount) {water.addLiquid(mouseX+i*2*water.sizeOfLiquidParticles,mouseY+j*2*water.sizeOfLiquidParticles,this.grid);ahh++;}
+            if (i*i + j*j <= addLiquidAmount*addLiquidAmount) {
+              this.addFluidToState(water.createLiquid(mouseX+i*2*water.sizeOfLiquidParticles,mouseY+j*2*water.sizeOfLiquidParticles));
+              ahh++;
+            }
           }
         }
         timeSinceLastSpawn = 0;
@@ -80,6 +142,31 @@ class Simulation {
     }
     timeSinceLastSpawn++;
   }
+  
+  //void userAddingLiquids() {
+  //  if (selectedLiquid > 0) {
+  //    fill(255);
+  //    stroke(0);
+  //    circle(mouseX, mouseY, addLiquidAmount*4*this.water.sizeOfLiquidParticles);
+  //  }
+  //  if (selectedLiquid == 1 && addingLiquid) {
+  //    if (timeSinceLastSpawn > 0.1*frameRate) {
+  //      if (addLiquidAmount == 0.5) {
+  //        water.addLiquid(mouseX, mouseY, this.grid);
+  //        ahh++;
+  //        timeSinceLastSpawn = 0;
+  //        return;
+  //      }
+  //      for (int i = -round(addLiquidAmount); i < round(addLiquidAmount)+1; i++) {
+  //        for (int j = -round(addLiquidAmount); j < round(addLiquidAmount)+1; j++) {
+  //          if (i*i + j*j <= addLiquidAmount*addLiquidAmount) {water.addLiquid(mouseX+i*2*water.sizeOfLiquidParticles,mouseY+j*2*water.sizeOfLiquidParticles,this.grid);ahh++;}
+  //        }
+  //      }
+  //      timeSinceLastSpawn = 0;
+  //    }
+  //  }
+  //  timeSinceLastSpawn++;
+  //}
   
   void userAddingBlocks() {
     if (drawingBlock) {

@@ -22,6 +22,11 @@ class Fluid {
     g.add(p);
   }
   
+  FluidParticle createLiquid(float x, float y) {
+    FluidParticle p = new FluidParticle(new PVector(x, y), color(0, 0, 255), this.sizeOfLiquidParticles);
+    return p;
+  }
+  
   //void updateLiquid(float g, Grid grid, float ssA) {
     //for (int i = 0; i < this.particles.size(); i++) {
     //  for (int j = 0; j < ssA; j++) this.particles.get(i).update(g, ssA, grid);

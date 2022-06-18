@@ -1,6 +1,7 @@
 import g4p_controls.*;
 Simulation s;
 int n;
+int userInputMode;
 int selectedLiquid;
 boolean addingLiquid;
 boolean paused;
@@ -14,19 +15,18 @@ boolean validBlockLocation;
 Block holdingBlock;
 PVector drawingBlockStartingPos;
 
-ArrayList<Integer> yes;
-
 int ahh;
 
 void setup() {
-  size(500, 500);
-  selectedLiquid = 0;
+  size(1000, 500);
+  userInputMode = 0;
+  selectedLiquid = 1;
   addingLiquid = false;
   n = height;
   paused = false;
-  addLiquidAmount = 5;
+  addLiquidAmount = 10;
   subStepAmount = 5;
-  blockMakerMode = true;
+  blockMakerMode = false;
   drawingBlock = false;
   startedBlock = false;
   finishedBlock = false;
@@ -35,6 +35,7 @@ void setup() {
   drawingBlockStartingPos = new PVector(0,0);
   s = new Simulation();
   ahh = 0;
+  createGUI();
 }
 
 
@@ -42,5 +43,10 @@ void draw () {
   if (!paused) {
     background(255);
     s.run();
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (s.fluidState[i][j] != null) {fill(0); rect(i+500,j,1,1);}
+      }
+    }
   }
 }
