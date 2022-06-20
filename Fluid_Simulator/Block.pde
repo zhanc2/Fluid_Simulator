@@ -69,13 +69,62 @@ class Block {
     
     if (this.pos.x < b.pos.x + b.size.x && this.pos.x + this.size.x > b.pos.x && this.pos.y < b.pos.y + b.size.y && this.pos.y + this.size.y > b.pos.y) {
       
-      if (this.velocity.x == 0) {
-        if (abs(this.velocity.y) > 1) {
-          this.pos.y = b.pos.y - this.size.y;
+      //if (this.velocity.x == 0) {
+      //  if (abs(this.velocity.y) > 1) {
+      //    this.pos.y = b.pos.y - this.size.y;
+      //    this.velocity.y = 0;
+      //  }
+      //}
+      
+      if (b.velocity.x == 0 && b.velocity.y == 0) {
+        PVector prevPos = new PVector(this.pos.x - this.velocity.x, this.pos.y + this.velocity.y);
+        int inBoundsTracker = inBounds(prevPos.x, prevPos.y, this.size.x, this.size.y, b.pos.x, b.pos.y, b.size.x, b.size.y);
+        float divide = 2;
+        while (inBoundsTracker == 0) {
+          prevPos = new PVector(this.pos.x - this.velocity.x/divide, this.pos.y + this.velocity.y/divide);
+          divide *= 2;
+          inBoundsTracker = inBounds(prevPos.x, prevPos.y, this.size.x, this.size.y, b.pos.x, b.pos.y, b.size.x, b.size.y);
+        }
+        println(inBoundsTracker);
+        
+        if (inBoundsTracker == 2) {
           this.velocity.y = 0;
+          if (this.pos.y + this.size.y/2 > b.pos.y + b.size.y/2) this.pos.y = b.pos.y + b.size.y;
+          else this.pos.y = b.pos.y - this.size.y;
+        } else {
+          this.velocity.x = 0;
+          if (this.pos.x + this.size.x/2 > b.pos.x + b.size.x/2) this.pos.x = b.pos.x + b.size.x;
+          else this.pos.x = b.pos.x - this.size.x;
+        }
+        
+      } else if (this.velocity.x == 0 && this.velocity.y == 0) {
+        PVector prevPos = new PVector(b.pos.x - b.velocity.x, b.pos.y + b.velocity.y);
+        int inBoundsTracker = inBounds(this.pos.x, this.pos.y, this.size.x, this.size.y, prevPos.x, prevPos.y, b.size.x, b.size.y);
+        float divide = 2;
+        while (inBoundsTracker == 0) {
+          prevPos = new PVector(b.pos.x - b.velocity.x/divide, b.pos.y + b.velocity.y/divide);
+          divide *= 2;
+          inBoundsTracker = inBounds(this.pos.x, this.pos.y, this.size.x, this.size.y, prevPos.x, prevPos.y, b.size.x, b.size.y);
+        }
+        
+        if (inBoundsTracker == 1) {
+          b.velocity.y = 0;
+          if (b.pos.y + b.size.y/2 > this.pos.y + this.size.y/2) b.pos.y = this.pos.y + this.size.y;
+          else b.pos.y = this.pos.y - b.size.y;
+        } else {
+          b.velocity.x = 0;
+          if (this.pos.x + this.size.x/2 > b.pos.x + b.size.x/2) b.pos.x = this.pos.x + this.size.x;
+          else b.pos.x = this.pos.x - b.size.x;
         }
       }
+      
     }
+  }
+  
+  int inBounds(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2) {
+    if (x1 < x2 + w2 && x1 + w1 > x2) return 1;
+    if (y1 < y2 + h2 && y1 + h1 > y2) return 2;
+    return 0;
   }
   
   void move() {
