@@ -8,6 +8,8 @@ class Simulation {
   FluidParticle[][] nextState;
   int fluidAmount;
   
+  int[] highestFluidLevel;
+  
   ArrayList<Block> blocks;
   ArrayList<Block> blocksToBeRemoved;
   
@@ -17,8 +19,6 @@ class Simulation {
     this.gravity = 1;
     this.timeSinceLastSpawn = 60;
     
-    //this.grid = new Grid(20);
-    
     this.blocks = new ArrayList<Block>();
     this.blocksToBeRemoved = new ArrayList<Block>();
     
@@ -27,6 +27,8 @@ class Simulation {
     
     this.fluidState = new FluidParticle[ss][ss];
     this.nextState = new FluidParticle[ss][ss];
+    
+    this.highestFluidLevel = new int[ss];
     
     this.fluidAmount = 0;
     
@@ -46,17 +48,17 @@ class Simulation {
   void blocks() {
     for (Block b : this.blocksToBeRemoved) this.blocks.remove(b);
     for (int i = 0; i < this.blocks.size(); i++) {
-      for (int s = 0; s < subStepAmount; s++) {
-        this.blocks.get(i).move();
-        this.blocks.get(i).gravity(this.gravity/subStepAmount);
-        this.blocks.get(i).updatePosition(subStepAmount);
+      this.blocks.get(i).move(this.cellSize);
+      this.blocks.get(i).gravity(this.gravity);
+      this.blocks.get(i).updatePosition(this.cellSize);
+      if (!this.blocks.get(i).pickedUp) {
         for (int j = 0; j < this.blocks.size(); j++) {
           if (j != i) {
             this.blocks.get(i).collision(this.blocks.get(j));
           }
         }
-        this.blocks.get(i).boundaries();
       }
+      this.blocks.get(i).boundaries();
       this.blocks.get(i).display();
     }
   }
@@ -64,8 +66,13 @@ class Simulation {
   void updateFluidState() {
     this.fluidAmount = 0;
     for (int i = 0; i < this.stateSize; i++) {
+      boolean firstFound = false;
       for (int j = 0; j < this.stateSize; j++) {
         if (this.fluidState[i][j] == null) continue;
+        if (!firstFound) {
+          firstFound = true;
+          highestFluidLevel[i] = j;
+        }
         this.fluidAmount++;
         fill(0,0,255,190);
         strokeWeight(0);
@@ -76,10 +83,8 @@ class Simulation {
         boolean condition = true;
         while (condition) {
           if (i + xAmount == this.stateSize-1) {
-            //this.fluidState[i][j].velocity.x = 0;
             if (!(i == this.stateSize-1 && roundedVelocity.x < 0)) break;
           } else if (i + xAmount == 0) {
-            //this.fluidState[i][j].velocity.x = 0;
             if (!(i == 0 && roundedVelocity.x > 0)) break;
           }
           if (abs(xAmount) == abs(roundedVelocity.x)) break;
@@ -109,24 +114,54 @@ class Simulation {
               break;
             }
           }
-          //println("oi");
         }
         
         int randLeveling = randomLeveling(i,j);
-        //println(randLeveling);
-        //if (randLeveling == 1) xAmount--;
-        //if (randLeveling == 2) xAmount++;
+
+        if (this.nextState[i+xAmount][j-yAmount] == null) {
+          this.nextState[i][j] = null;
+          this.fluidState[i][j].pos.x += xAmount;
+          this.fluidState[i][j].pos.y -= yAmount;  //<>//
+          this.nextState[i+xAmount][j-yAmount] = this.fluidState[i][j];
+        }
         
-        this.nextState[i][j] = null;
-        this.fluidState[i][j].pos.x += xAmount;
-        this.fluidState[i][j].pos.y -= yAmount; //<>// //<>//
-        this.nextState[i+xAmount][j-yAmount] = this.fluidState[i][j];
-        //if (randLeveling == 1) {
-        //  this.nextState[i+xAmount][j-yAmount].velocity.x = -1;
-        //}
-        //if (randLeveling == 2) {
-        //  this.nextState[i+xAmount][j-yAmount].velocity.x = 1;
-        //}
+        if (randLeveling == 1) {
+          this.nextState[i+xAmount][j-yAmount].velocity.x = -1;
+        }
+        if (randLeveling == 2) {
+          this.nextState[i+xAmount][j-yAmount].velocity.x = 1;
+        }
+        
+        if (j-yAmount > 0) {
+          for (Block b : this.blocks) {
+            if ((j-yAmount-1)*this.cellSize <= b.pos.y + b.size.y && (j-yAmount-1)*this.cellSize >= b.pos.y && (i+yAmount)*this.cellSize <= b.pos.x + b.size.x && (i+yAmount)*this.cellSize >= b.pos.x) {
+              int disToLeftWall = int(b.pos.x);
+              int disToRightWall = int(this.stateSize - b.pos.x - b.size.x);
+              int displacement;
+              boolean findingPlace = true;
+              int tries = 0;
+              while (findingPlace) {
+                tries++;
+                if ((i+yAmount) > b.pos.x + b.size.x/2) {
+                  displacement = min(disToRightWall/this.cellSize, round(random(1, 10)));
+                } else {
+                  displacement = -min(disToLeftWall/this.cellSize, round(random(1, 10)));
+                }
+                if (this.highestFluidLevel[i+yAmount+displacement] > 0) {
+                  if (this.nextState[i+yAmount+displacement][this.highestFluidLevel[i+yAmount+displacement-1]] == null) {
+                    FluidParticle temp = this.nextState[i+xAmount][j-yAmount];
+                    this.nextState[i+xAmount][j-yAmount] = null;
+                    this.highestFluidLevel[i+yAmount+displacement]--;
+                    this.nextState[i+yAmount+displacement][this.highestFluidLevel[i+yAmount+displacement]] = temp;
+                    //this.nextState[i+yAmount+displacement][this.highestFluidLevel[i+yAmount+displacement-1]].setVelocity(0,0);
+                    findingPlace = false;
+                  }
+                }
+                if (tries > 5) {findingPlace = false;}
+              }
+            }
+          }
+        }
       }
     }
     //println(this.fluidAmount);
@@ -139,24 +174,26 @@ class Simulation {
     if (i == this.stateSize-1) {
       if (this.fluidState[i-1][j] != null) {return 0;}
       float r = random(0,1);
-      return int(r > 0.5);
+      return int(r > 0.1);
     }
     if (i == 0) {
       if (this.fluidState[i+1][j] != null) {return 0;}
       float r = random(0,1);
-      return 2 * int(r > 0.5);
+      return 2 * int(r > 0.1);
     }
     if (this.fluidState[i+1][j] != null && this.fluidState[i-1][j] != null) return 0;
     if (this.fluidState[i+1][j] != null) {
-      float r = random(0,1);
-      return int(r > 0.5);
-    } else if (this.fluidState[i-1][j] != null) {
-      float r = random(0,1);
-      return 2 * int(r > 0.5);
+      //float r = random(0,1);
+      //return int(r > 0.1);
+      return 1;
+  } else if (this.fluidState[i-1][j] != null) {
+      //float r = random(0,1);
+      //return 2 * int(r > 0.1);
+      return 2;
     }
-    float r = random(0,3);
-    if (r < 1) return 0;
-    if (r < 2) return 1;
+    float r = random(0,2);
+    //if (r < 0.1) return 0;
+    if (r < 1) return 1;
     return 2;
   }
   
@@ -176,6 +213,16 @@ class Simulation {
     } 
   }
   
+  boolean pointInBlock(int x, int y) {
+    for (Block b : this.blocks) {
+      if (x < b.pos.x + b.size.x && x > b.pos.x && y < b.pos.y + b.size.y && y > b.pos.y) {
+        println("hey");
+        return true;
+      }
+    }
+    return false;
+  }
+  
   void userAddingLiquids() {
     if (selectedLiquid != 0) {
       fill(255);
@@ -186,16 +233,20 @@ class Simulation {
     if (selectedLiquid == 1 && addingLiquid) {
       if (timeSinceLastSpawn > 0.1*frameRate) {
         if (addLiquidAmount == 0.5) {
-          this.addFluidToState(water.createLiquid(mouseX/(n/this.stateSize),mouseY/(n/this.stateSize)));
-          ahh++;
-          timeSinceLastSpawn = 0;
-          return;
+          if (!pointInBlock(mouseX, mouseY)) {
+            this.addFluidToState(water.createLiquid(mouseX/(n/this.stateSize),mouseY/(n/this.stateSize)));
+            ahh++;
+            timeSinceLastSpawn = 0;
+            return;
+          }
         }
         for (int i = -round(addLiquidAmount); i < round(addLiquidAmount)+1; i++) {
           for (int j = -round(addLiquidAmount); j < round(addLiquidAmount)+1; j++) {
             if (i*i + j*j <= addLiquidAmount*addLiquidAmount) {
-              this.addFluidToState(water.createLiquid((mouseX/(n/this.stateSize))+i,(mouseY/(n/this.stateSize))+j));
-              ahh++;
+              if (!pointInBlock(mouseX+i*this.cellSize, mouseY+j*this.cellSize)) {
+                this.addFluidToState(water.createLiquid((mouseX/this.cellSize)+i,(mouseY/this.cellSize)+j));
+                ahh++;
+              }
             }
           }
         }

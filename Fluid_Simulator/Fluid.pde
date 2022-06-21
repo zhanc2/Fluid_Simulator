@@ -5,15 +5,11 @@ class Fluid {
   float sizeOfLiquidParticles;
   color c;
   
-  //ArrayList<FluidParticle> particles;
-  
   Fluid(float d, float v, float sOLP, color C) {
     this.density = d;
     this.viscosity = v;
     this.sizeOfLiquidParticles = sOLP;
     this.c = C;
-    
-    //this.particles = new ArrayList<FluidParticle>();
   }
   
   FluidParticle createLiquid(float x, float y) {

@@ -24,6 +24,10 @@ public void addLiquidSliderEvent(GSlider source, GEvent event) { //_CODE_:addLiq
 
 public void shiftInputModeEvent(GButton source, GEvent event) { //_CODE_:shiftInputMode:794145:
   userInputMode = (userInputMode + 1) % 4;
+  updateUserInputMode();
+} //_CODE_:shiftInputMode:794145:
+
+void updateUserInputMode() {
   if (userInputMode == 0) {
     deletingBlockMode = false;
     selectedLiquid = 1;
@@ -48,10 +52,13 @@ public void shiftInputModeEvent(GButton source, GEvent event) { //_CODE_:shiftIn
     blockMakerMode = false;
     currentMode.setText("Current Mode: Deleting Blocks");
   }
-} //_CODE_:shiftInputMode:794145:
+}
 
 public void resetButtonClick(GButton source, GEvent event) { //_CODE_:resetButton:853558:
   s = new Simulation(n/5);
+  userInputMode = 0;
+  addLiquidSlider.setValue(10);
+  updateUserInputMode();
 } //_CODE_:resetButton:853558:
 
 public void pauseButtonClick(GButton source, GEvent event) { //_CODE_:pauseButton:971392:

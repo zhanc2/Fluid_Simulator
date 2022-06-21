@@ -9,7 +9,6 @@ boolean deletingBlockMode;
 boolean deletingBlock;
 boolean paused;
 float addLiquidAmount;
-float subStepAmount;
 boolean blockMakerMode;
 boolean drawingBlock;
 boolean startedBlock;
@@ -21,7 +20,7 @@ PVector drawingBlockStartingPos;
 int ahh;
 
 void setup() {
-  size(600, 600);
+  size(1200, 600);
   userInputMode = 0;
   selectedLiquid = 1;
   addingLiquid = false;
@@ -29,7 +28,6 @@ void setup() {
   n = height;
   paused = false;
   addLiquidAmount = 10;
-  subStepAmount = 1;
   blockMakerMode = false;
   deletingBlockMode = false;
   deletingBlock = false;
@@ -49,6 +47,8 @@ void draw () {
   if (!paused) {
     background(255);
     s.run();
-    //if (holdingBlock != null) println(holdingBlock.velocity);
+    for (int i = 0; i < s.highestFluidLevel.length; i++) {
+      rect(600 + i*s.cellSize, s.highestFluidLevel[i]*s.cellSize, s.cellSize, s.cellSize);
+    }
   }
 }

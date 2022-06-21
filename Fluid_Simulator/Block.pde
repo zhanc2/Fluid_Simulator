@@ -31,17 +31,10 @@ class Block {
     rect(this.pos.x, this.pos.y, this.size.x, this.size.y);
   }
   
-  void updatePosition(float subStepAmount) {
+  void updatePosition(int cellSize) {
     if (!pickedUp) {
-      this.pos.x += this.velocity.x/subStepAmount;
-      this.pos.y -= this.velocity.y/subStepAmount;
-    }
-  }
-  
-  void undoVelocity() {
-    if (!pickedUp) {
-      this.pos.x -= this.velocity.x;
-      this.pos.y += this.velocity.y;
+      this.pos.x = (this.pos.x + this.velocity.x) - (this.pos.x + this.velocity.x) % cellSize;
+      this.pos.y = (this.pos.y - this.velocity.y) - (this.pos.y - this.velocity.y) % cellSize;
     }
   }
   
@@ -74,14 +67,7 @@ class Block {
     
     if (this.pos.x < b.pos.x + b.size.x && this.pos.x + this.size.x > b.pos.x && this.pos.y < b.pos.y + b.size.y && this.pos.y + this.size.y > b.pos.y) {
       
-      //if (this.velocity.x == 0) {
-      //  if (abs(this.velocity.y) > 1) {
-      //    this.pos.y = b.pos.y - this.size.y;
-      //    this.velocity.y = 0;
-      //  }
-      //}
-      
-      if (b.velocity.x == 0 && b.velocity.y == 0) {
+      if ((b.velocity.x == 0 && b.velocity.y == 0)) {
         PVector prevPos = new PVector(this.pos.x - this.velocity.x, this.pos.y + this.velocity.y);
         int inBoundsTracker = inBounds(prevPos.x, prevPos.y, this.size.x, this.size.y, b.pos.x, b.pos.y, b.size.x, b.size.y);
         float divide = 2;
@@ -109,7 +95,7 @@ class Block {
           }
         }
         
-      } else if (this.velocity.x == 0 && this.velocity.y == 0) {
+      } else if ((this.velocity.x == 0 && this.velocity.y == 0)) {
         PVector prevPos = new PVector(b.pos.x - b.velocity.x, b.pos.y + b.velocity.y);
         int inBoundsTracker = inBounds(this.pos.x, this.pos.y, this.size.x, this.size.y, prevPos.x, prevPos.y, b.size.x, b.size.y);
         float divide = 2;
@@ -143,15 +129,15 @@ class Block {
     return 0;
   }
   
-  void move() {
+  void move(int cellSize) {
     this.counter++;
     if (this.pickedUp) {
       if (this.counter % 3 == 0) {
         this.velocity.x = (mouseX - this.prevMousePos.x);
         this.velocity.y = (this.prevMousePos.y - mouseY);
       }
-      this.pos.x = mouseX - this.pickedUpPosition.x;
-      this.pos.y = mouseY - this.pickedUpPosition.y;
+      this.pos.x = (mouseX - this.pickedUpPosition.x) - (mouseX - this.pickedUpPosition.x) % cellSize;
+      this.pos.y = (mouseY - this.pickedUpPosition.y) - (mouseY - this.pickedUpPosition.y) % cellSize;
       this.prevMousePos.x = mouseX;
       this.prevMousePos.y = mouseY;
     }
