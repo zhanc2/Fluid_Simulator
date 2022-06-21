@@ -11,6 +11,8 @@ class Block {
   PVector pickedUpPosition;
   PVector prevMousePos;
   
+  int counter;
+  
   Block(PVector p, PVector v, PVector s, float m, float d, color C) {
     this.pos = new PVector(p.x, p.y);
     this.velocity = new PVector(v.x, v.y);
@@ -21,6 +23,7 @@ class Block {
     this.pickedUp = false;
     this.pickedUpPosition = new PVector(0,0);
     this.prevMousePos = new PVector(0,0);
+    this.counter = 0;
   }
   
   void display() {
@@ -49,13 +52,15 @@ class Block {
   void boundaries() {
     if (this.pos.y + this.size.y > height) {
       this.pos.y = height - this.size.y;
-      this.velocity.x = 0;
+      this.velocity.x *= 0.9;
+      if (abs(this.velocity.x) < 0.3) this.velocity.x = 0; 
       this.velocity.y = 0;
     }
     if (this.pos.y < 0) {
       this.pos.y = 0;
       this.velocity.y = 0;
-      this.velocity.x = 0;
+      this.velocity.x *= 0.9;
+      if (abs(this.velocity.x) < 0.3) this.velocity.x = 0; 
     }
     if (this.pos.x + this.size.x > width) {
       this.pos.x = width - this.size.x;
@@ -85,16 +90,23 @@ class Block {
           divide *= 2;
           inBoundsTracker = inBounds(prevPos.x, prevPos.y, this.size.x, this.size.y, b.pos.x, b.pos.y, b.size.x, b.size.y);
         }
-        println(inBoundsTracker);
         
-        if (inBoundsTracker == 2) {
+        if (inBoundsTracker == 1) {
           this.velocity.y = 0;
           if (this.pos.y + this.size.y/2 > b.pos.y + b.size.y/2) this.pos.y = b.pos.y + b.size.y;
-          else this.pos.y = b.pos.y - this.size.y;
+          else {
+            this.pos.y = b.pos.y - this.size.y;
+            this.velocity.x *= 0.9;
+            if (abs(this.velocity.x) < 0.3) this.velocity.x = 0; 
+          }
         } else {
           this.velocity.x = 0;
-          if (this.pos.x + this.size.x/2 > b.pos.x + b.size.x/2) this.pos.x = b.pos.x + b.size.x;
-          else this.pos.x = b.pos.x - this.size.x;
+          if (this.pos.x + this.size.x/2 > b.pos.x + b.size.x/2) {
+            this.pos.x = b.pos.x + b.size.x; //<>//
+          }
+          else {
+            this.pos.x = b.pos.x - this.size.x; //<>//
+          }
         }
         
       } else if (this.velocity.x == 0 && this.velocity.y == 0) {
@@ -110,7 +122,11 @@ class Block {
         if (inBoundsTracker == 1) {
           b.velocity.y = 0;
           if (b.pos.y + b.size.y/2 > this.pos.y + this.size.y/2) b.pos.y = this.pos.y + this.size.y;
-          else b.pos.y = this.pos.y - b.size.y;
+          else {
+            b.pos.y = this.pos.y - b.size.y;
+            b.velocity.x *= 0.9;
+            if (abs(b.velocity.x) < 0.3) this.velocity.x = 0;
+          }
         } else {
           b.velocity.x = 0;
           if (this.pos.x + this.size.x/2 > b.pos.x + b.size.x/2) b.pos.x = this.pos.x + this.size.x;
@@ -128,9 +144,12 @@ class Block {
   }
   
   void move() {
+    this.counter++;
     if (this.pickedUp) {
-      this.velocity.x = (mouseX - this.prevMousePos.x);
-      this.velocity.y = (this.prevMousePos.y - mouseY);
+      if (this.counter % 3 == 0) {
+        this.velocity.x = (mouseX - this.prevMousePos.x);
+        this.velocity.y = (this.prevMousePos.y - mouseY);
+      }
       this.pos.x = mouseX - this.pickedUpPosition.x;
       this.pos.y = mouseY - this.pickedUpPosition.y;
       this.prevMousePos.x = mouseX;

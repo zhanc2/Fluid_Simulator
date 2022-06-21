@@ -32,48 +32,7 @@ class FluidParticle {
   void applyForces(float ssA) {
     this.pos.x += this.velocity.x / ssA;
     this.pos.y -= this.velocity.y / ssA;
-  }
-  
-  void collision(FluidParticle fp, boolean recursed) {
-    
-    float xDis = fp.pos.x - this.pos.x;
-    float yDis = fp.pos.y - this.pos.y;
-    float disBetweenCenters = sqrt(xDis * xDis + yDis * yDis);
-    
-    if (disBetweenCenters < 2*this.size) {
-      if (disBetweenCenters == 0) {
-        return;
-      }
-      float ratio = this.size / disBetweenCenters;
-      float xComponent = xDis * ratio;
-      float yComponent = yDis * ratio;
-      
-      //float midX = this.pos.x + xDis/2;
-      //float midY = this.pos.y + yDis/2;
-      //float averageVelocity = (this.velocity.mag() + fp.velocity.mag())/2.0;
-      
-      stroke(0);
-      strokeWeight(1);
-      //line(this.pos.x, this.pos.y, fp.pos.x, fp.pos.y);
-      
-      //this.pos.x = midX - xComponent;
-      //this.pos.y = midY - yComponent;
-      //if (this.pos.y > height - this.size - 5 && fp.pos.y - 2 * yComponent > height - this.size && abs(fp.velocity.x) < 1) {
-      //  //fp.collision(this, true);
-      //  fp.setPos(fp.pos.x,this.pos.y - 2 * this.size); //<>// //<>//
-      //  //fp.setVelocity(0);
-      //} else {
-      //  this.setPos(fp.pos.x - 2 * xComponent, fp.pos.y - 2 * yComponent); //<>// //<>//
-      //}
-      this.setPos(fp.pos.x - 2 * xComponent, fp.pos.y - 2 * yComponent); //<>//
-      //this.setVelocity(averageVelocity * 0.9);
-      //this.setVelocity(0,0);
-       //<>//
-      //fp.setPos(midX + xComponent, midY + yComponent);
-      if (this.velocity.mag() == 0) fp.setVelocity(0);
-      //fp.setVelocity(0,0);
-    }
-  }
+  } //<>// //<>// //<>// //<>//
   
   void setPos(float x, float y) {
     this.pos.x = x;

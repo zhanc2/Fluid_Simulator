@@ -19,23 +19,46 @@ synchronized public void win_draw1(PApplet appc, GWinData data) { //_CODE_:windo
 } //_CODE_:window1:894194:
 
 public void addLiquidSliderEvent(GSlider source, GEvent event) { //_CODE_:addLiquidSlider:761355:
-  println("addLiquidSlider - GSlider >> GEvent." + event + " @ " + millis());
+  addLiquidAmount = addLiquidSlider.getValueF();
 } //_CODE_:addLiquidSlider:761355:
 
 public void shiftInputModeEvent(GButton source, GEvent event) { //_CODE_:shiftInputMode:794145:
-  userInputMode = (userInputMode + 1) % 2;
+  userInputMode = (userInputMode + 1) % 4;
   if (userInputMode == 0) {
+    deletingBlockMode = false;
     selectedLiquid = 1;
     blockMakerMode = false;
     currentMode.setText("Current Mode: Adding Fluid");
-    
   }
-  else if (userInputMode == 1) {
+  else if (userInputMode == 2) {
     selectedLiquid = 0;
+    deletingBlockMode = false;
     blockMakerMode = true;
     currentMode.setText("Current Mode: Adding Blocks");
   }
+  else if (userInputMode == 1) {
+    selectedLiquid = -1;
+    deletingBlockMode = false;
+    blockMakerMode = false;
+    currentMode.setText("Current Mode: Deleting Fluid");
+  }
+  else if (userInputMode == 3) {
+    deletingBlockMode = true;
+    selectedLiquid = 0;
+    blockMakerMode = false;
+    currentMode.setText("Current Mode: Deleting Blocks");
+  }
 } //_CODE_:shiftInputMode:794145:
+
+public void resetButtonClick(GButton source, GEvent event) { //_CODE_:resetButton:853558:
+  s = new Simulation(n/5);
+} //_CODE_:resetButton:853558:
+
+public void pauseButtonClick(GButton source, GEvent event) { //_CODE_:pauseButton:971392:
+  paused = !paused;
+  if (paused) pauseButton.setText("Play");
+  else pauseButton.setText("Pause");
+} //_CODE_:pauseButton:971392:
 
 
 
@@ -51,14 +74,14 @@ public void createGUI(){
   window1.setActionOnClose(G4P.KEEP_OPEN);
   window1.addDrawHandler(this, "win_draw1");
   addLiquidSlider = new GSlider(window1, 10, 100, 100, 40, 10.0);
-  addLiquidSlider.setLimits(10, 1, 20);
-  addLiquidSlider.setNumberFormat(G4P.INTEGER, 0);
+  addLiquidSlider.setLimits(10.0, 0.5, 20.0);
+  addLiquidSlider.setNumberFormat(G4P.DECIMAL, 0);
   addLiquidSlider.setOpaque(false);
   addLiquidSlider.addEventHandler(this, "addLiquidSliderEvent");
   shiftInputMode = new GButton(window1, 120, 10, 80, 30);
   shiftInputMode.setText("Next");
   shiftInputMode.addEventHandler(this, "shiftInputModeEvent");
-  currentMode = new GLabel(window1, 20, 5, 100, 40);
+  currentMode = new GLabel(window1, 10, 5, 100, 40);
   currentMode.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
   currentMode.setText("Current Mode: Adding Liquid");
   currentMode.setOpaque(false);
@@ -66,6 +89,13 @@ public void createGUI(){
   liquidAddAmountLabel.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
   liquidAddAmountLabel.setText("Amount of Liquid to Add");
   liquidAddAmountLabel.setOpaque(false);
+  resetButton = new GButton(window1, 20, 165, 80, 30);
+  resetButton.setTextAlign(GAlign.CENTER, GAlign.CENTER);
+  resetButton.setText("Reset");
+  resetButton.addEventHandler(this, "resetButtonClick");
+  pauseButton = new GButton(window1, 140, 165, 80, 30);
+  pauseButton.setText("Pause");
+  pauseButton.addEventHandler(this, "pauseButtonClick");
   window1.loop();
 }
 
@@ -76,3 +106,5 @@ GSlider addLiquidSlider;
 GButton shiftInputMode; 
 GLabel currentMode; 
 GLabel liquidAddAmountLabel; 
+GButton resetButton; 
+GButton pauseButton; 

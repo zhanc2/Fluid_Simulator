@@ -4,6 +4,9 @@ int n;
 int userInputMode;
 int selectedLiquid;
 boolean addingLiquid;
+boolean deletingLiquid;
+boolean deletingBlockMode;
+boolean deletingBlock;
 boolean paused;
 float addLiquidAmount;
 float subStepAmount;
@@ -22,11 +25,14 @@ void setup() {
   userInputMode = 0;
   selectedLiquid = 1;
   addingLiquid = false;
+  deletingLiquid = false;
   n = height;
   paused = false;
   addLiquidAmount = 10;
-  subStepAmount = 5;
+  subStepAmount = 1;
   blockMakerMode = false;
+  deletingBlockMode = false;
+  deletingBlock = false;
   drawingBlock = false;
   startedBlock = false;
   finishedBlock = false;
@@ -43,5 +49,6 @@ void draw () {
   if (!paused) {
     background(255);
     s.run();
+    //if (holdingBlock != null) println(holdingBlock.velocity);
   }
 }

@@ -2,12 +2,14 @@ class Simulation {
   
   Fluid water;
   float gravity;
-  Grid grid;
   int stateSize;
+  int cellSize;
   FluidParticle[][] fluidState;
   FluidParticle[][] nextState;
+  int fluidAmount;
   
   ArrayList<Block> blocks;
+  ArrayList<Block> blocksToBeRemoved;
   
   float timeSinceLastSpawn;
   
@@ -18,40 +20,35 @@ class Simulation {
     //this.grid = new Grid(20);
     
     this.blocks = new ArrayList<Block>();
+    this.blocksToBeRemoved = new ArrayList<Block>();
     
     this.stateSize = ss;
+    this.cellSize = n/ss;
     
     this.fluidState = new FluidParticle[ss][ss];
     this.nextState = new FluidParticle[ss][ss];
     
-    this.water = new Fluid(1, 1, n/ss, color(0, 0, 255));
+    this.fluidAmount = 0;
     
-    //for (int i = 0; i < 7; i++) {
-    //  for (int j = 0; j < 7; j++) {
-    //    this.water.addLiquid(50+40*i, 50+40*j, this.grid);
-    //  }
-    //}
+    this.water = new Fluid(1, 1, n/ss, color(0, 0, 255));
     
   }
   
   void run() {
     this.userAddingLiquids();
-    //this.liquids();
     this.blocks();
     this.userAddingBlocks();
+    this.userDeletingBlocks();
     this.updateFluidState();
     this.copyNextState();
   }
   
-  void liquids() {
-    this.grid.handleCells(this.gravity, subStepAmount);
-  }
-  
   void blocks() {
+    for (Block b : this.blocksToBeRemoved) this.blocks.remove(b);
     for (int i = 0; i < this.blocks.size(); i++) {
       for (int s = 0; s < subStepAmount; s++) {
         this.blocks.get(i).move();
-        this.blocks.get(i).gravity(this.gravity/2);
+        this.blocks.get(i).gravity(this.gravity/subStepAmount);
         this.blocks.get(i).updatePosition(subStepAmount);
         for (int j = 0; j < this.blocks.size(); j++) {
           if (j != i) {
@@ -65,34 +62,102 @@ class Simulation {
   }
   
   void updateFluidState() {
+    this.fluidAmount = 0;
     for (int i = 0; i < this.stateSize; i++) {
       for (int j = 0; j < this.stateSize; j++) {
         if (this.fluidState[i][j] == null) continue;
-        //this.fluidState[i][j].display();
+        this.fluidAmount++;
         fill(0,0,255,190);
         strokeWeight(0);
         rect(i*(n/this.stateSize), j*(n/this.stateSize), this.fluidState[i][j].size, this.fluidState[i][j].size);
         this.fluidState[i][j].gravity(this.gravity);
         PVector roundedVelocity = new PVector(int(this.fluidState[i][j].velocity.x), int(this.fluidState[i][j].velocity.y));
         int xAmount = 0, yAmount = 0;
-        while (true) {
-          if (i + xAmount == this.stateSize-1 || i + xAmount == 0) break;
+        boolean condition = true;
+        while (condition) {
+          if (i + xAmount == this.stateSize-1) {
+            //this.fluidState[i][j].velocity.x = 0;
+            if (!(i == this.stateSize-1 && roundedVelocity.x < 0)) break;
+          } else if (i + xAmount == 0) {
+            //this.fluidState[i][j].velocity.x = 0;
+            if (!(i == 0 && roundedVelocity.x > 0)) break;
+          }
           if (abs(xAmount) == abs(roundedVelocity.x)) break;
           xAmount += 1 +(-2 * int(roundedVelocity.x < 0));
           if (this.fluidState[i+xAmount][j] != null) {xAmount -= 1 +(-2 * int(roundedVelocity.x < 0));break;}
+          for (Block b : this.blocks) {
+            if ((j-yAmount)*this.cellSize >= b.pos.y && (j-yAmount)*this.cellSize <= b.pos.y + b.size.y && (i+yAmount)*this.cellSize <= b.pos.x + b.size.x && (i+yAmount)*this.cellSize >= b.pos.x) {
+              xAmount -= 1 +(-2 * int(roundedVelocity.x < 0));
+              condition=false;
+              break;
+            }
+          }
         }
-        while (true) {
-          if (j - yAmount == this.stateSize-1 || j - yAmount == 0) break;
+        condition = true;
+        while (condition) {
+          if (j - yAmount == this.stateSize-1) {
+            this.fluidState[i][j].velocity.y = 0;
+            break;
+          } else if (j - yAmount == 0) break;
           if (abs(yAmount) == abs(roundedVelocity.y)) break;
           yAmount += 1 + (-2 * int(roundedVelocity.y < 0));
           if (this.fluidState[i][j-yAmount] != null) {yAmount -= 1 + (-2 * int(roundedVelocity.y < 0));break;}
+          for (Block b : this.blocks) {
+            if ((j-yAmount)*this.cellSize >= b.pos.y && (j-yAmount)*this.cellSize <= b.pos.y + b.size.y && (i+yAmount)*this.cellSize <= b.pos.x + b.size.x && (i+yAmount)*this.cellSize >= b.pos.x) {
+              yAmount -= 1 + (-2 * int(roundedVelocity.y < 0));
+              condition=false;
+              break;
+            }
+          }
+          //println("oi");
         }
+        
+        int randLeveling = randomLeveling(i,j);
+        //println(randLeveling);
+        //if (randLeveling == 1) xAmount--;
+        //if (randLeveling == 2) xAmount++;
+        
         this.nextState[i][j] = null;
         this.fluidState[i][j].pos.x += xAmount;
-        this.fluidState[i][j].pos.y -= yAmount;
+        this.fluidState[i][j].pos.y -= yAmount; //<>// //<>//
         this.nextState[i+xAmount][j-yAmount] = this.fluidState[i][j];
+        //if (randLeveling == 1) {
+        //  this.nextState[i+xAmount][j-yAmount].velocity.x = -1;
+        //}
+        //if (randLeveling == 2) {
+        //  this.nextState[i+xAmount][j-yAmount].velocity.x = 1;
+        //}
       }
     }
+    //println(this.fluidAmount);
+  }
+  
+  int randomLeveling(int i, int j) {
+    if (j != this.stateSize-1) 
+      if (this.fluidState[i][j+1] == null) return 0;
+    
+    if (i == this.stateSize-1) {
+      if (this.fluidState[i-1][j] != null) {return 0;}
+      float r = random(0,1);
+      return int(r > 0.5);
+    }
+    if (i == 0) {
+      if (this.fluidState[i+1][j] != null) {return 0;}
+      float r = random(0,1);
+      return 2 * int(r > 0.5);
+    }
+    if (this.fluidState[i+1][j] != null && this.fluidState[i-1][j] != null) return 0;
+    if (this.fluidState[i+1][j] != null) {
+      float r = random(0,1);
+      return int(r > 0.5);
+    } else if (this.fluidState[i-1][j] != null) {
+      float r = random(0,1);
+      return 2 * int(r > 0.5);
+    }
+    float r = random(0,3);
+    if (r < 1) return 0;
+    if (r < 2) return 1;
+    return 2;
   }
   
   void copyNextState() {
@@ -112,7 +177,7 @@ class Simulation {
   }
   
   void userAddingLiquids() {
-    if (selectedLiquid > 0) {
+    if (selectedLiquid != 0) {
       fill(255);
       stroke(0);
       strokeWeight(1);
@@ -136,40 +201,35 @@ class Simulation {
         }
         timeSinceLastSpawn = 0;
       }
+    } else if (selectedLiquid == -1 && deletingLiquid) {
+      if (addLiquidAmount == 0.5) {
+        this.fluidState[mouseX/this.cellSize][mouseY/this.cellSize] = null;
+        ahh--;
+      }
+      for (int i = -round(addLiquidAmount); i < round(addLiquidAmount)+1; i++) {
+          for (int j = -round(addLiquidAmount); j < round(addLiquidAmount)+1; j++) {
+            if (i*i + j*j <= addLiquidAmount*addLiquidAmount) {
+              try {
+                this.fluidState[mouseX/this.cellSize+i][mouseY/this.cellSize+j] = null;
+                this.nextState[mouseX/this.cellSize+i][mouseY/this.cellSize+j] = null;
+              }
+              catch (Exception e) {}
+              ahh--;
+            }
+          }
+        }
     }
     timeSinceLastSpawn++;
   }
-  
-  //void userAddingLiquids() {
-  //  if (selectedLiquid > 0) {
-  //    fill(255);
-  //    stroke(0);
-  //    circle(mouseX, mouseY, addLiquidAmount*4*this.water.sizeOfLiquidParticles);
-  //  }
-  //  if (selectedLiquid == 1 && addingLiquid) {
-  //    if (timeSinceLastSpawn > 0.1*frameRate) {
-  //      if (addLiquidAmount == 0.5) {
-  //        water.addLiquid(mouseX, mouseY, this.grid);
-  //        ahh++;
-  //        timeSinceLastSpawn = 0;
-  //        return;
-  //      }
-  //      for (int i = -round(addLiquidAmount); i < round(addLiquidAmount)+1; i++) {
-  //        for (int j = -round(addLiquidAmount); j < round(addLiquidAmount)+1; j++) {
-  //          if (i*i + j*j <= addLiquidAmount*addLiquidAmount) {water.addLiquid(mouseX+i*2*water.sizeOfLiquidParticles,mouseY+j*2*water.sizeOfLiquidParticles,this.grid);ahh++;}
-  //        }
-  //      }
-  //      timeSinceLastSpawn = 0;
-  //    }
-  //  }
-  //  timeSinceLastSpawn++;
-  //}
   
   void userAddingBlocks() {
     if (drawingBlock) {
       validBlockLocation = true;
       for (Block b : this.blocks) {
-        if (blockCollision(min(drawingBlockStartingPos.x, mouseX), min(drawingBlockStartingPos.y, mouseY), abs(mouseX - drawingBlockStartingPos.x), abs(mouseY - drawingBlockStartingPos.y), b.pos.x, b.pos.y, b.size.x, b.size.y)) {
+        if (blockCollision(min(drawingBlockStartingPos.x, mouseX) - min(drawingBlockStartingPos.x, mouseX)%this.cellSize, 
+        min(drawingBlockStartingPos.y, mouseY) - min(drawingBlockStartingPos.y, mouseY)%this.cellSize, 
+        abs(mouseX - drawingBlockStartingPos.x) - abs(mouseX - drawingBlockStartingPos.x)%this.cellSize, 
+        abs(mouseY - drawingBlockStartingPos.y) - abs(mouseY - drawingBlockStartingPos.y)%this.cellSize, b.pos.x, b.pos.y, b.size.x, b.size.y)) {
           strokeWeight(0);
           fill(255,0,0, 170);
           validBlockLocation = false;
@@ -180,7 +240,10 @@ class Simulation {
         stroke(0);
         strokeWeight(1);
       }
-      rect(min(drawingBlockStartingPos.x, mouseX), min(drawingBlockStartingPos.y, mouseY), abs(mouseX - drawingBlockStartingPos.x), abs(mouseY - drawingBlockStartingPos.y));
+      rect(min(drawingBlockStartingPos.x, mouseX) - min(drawingBlockStartingPos.x, mouseX)%this.cellSize, 
+      min(drawingBlockStartingPos.y, mouseY) - min(drawingBlockStartingPos.y, mouseY)%this.cellSize, 
+      abs(mouseX - drawingBlockStartingPos.x) - abs(mouseX - drawingBlockStartingPos.x)%this.cellSize, 
+      abs(mouseY - drawingBlockStartingPos.y) - abs(mouseY - drawingBlockStartingPos.y)%this.cellSize);
     } else {
       if (finishedBlock) {
         if (mouseX - drawingBlockStartingPos.x != 0 && mouseY - drawingBlockStartingPos.y != 0) {
@@ -190,10 +253,22 @@ class Simulation {
             return;
           }
           
-          Block b = new Block(new PVector(min(drawingBlockStartingPos.x, mouseX), min(drawingBlockStartingPos.y, mouseY)), new PVector(0,0), new PVector(abs(mouseX - drawingBlockStartingPos.x), abs(mouseY - drawingBlockStartingPos.y)), 10, 10, color(0));
+          Block b = new Block(new PVector(min(drawingBlockStartingPos.x, mouseX) - min(drawingBlockStartingPos.x, mouseX)%this.cellSize, min(drawingBlockStartingPos.y, mouseY) - min(drawingBlockStartingPos.y, mouseY)%this.cellSize), 
+          new PVector(0,0), new PVector(abs(mouseX - drawingBlockStartingPos.x) - abs(mouseX - drawingBlockStartingPos.x)%this.cellSize, abs(mouseY - drawingBlockStartingPos.y) - abs(mouseY - drawingBlockStartingPos.y)%this.cellSize), 10, 10, color(0));
           this.blocks.add(b);
         }
         finishedBlock = false;
+      }
+    }
+  }
+  
+  void userDeletingBlocks() {
+    if (deletingBlockMode && deletingBlock) {
+      for (Block b : this.blocks) {
+        if (mouseX < b.pos.x + b.size.x && mouseX > b.pos.x && mouseY < b.pos.y + b.size.y && mouseY > b.pos.y) {
+          this.blocksToBeRemoved.add(b);
+          return;
+        }
       }
     }
   }
