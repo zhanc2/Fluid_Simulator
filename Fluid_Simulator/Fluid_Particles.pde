@@ -4,15 +4,17 @@ class FluidParticle {
   PVector velocity;
   float size;
   color c;
+  float density;
   
-  boolean[] againstBoundary;
+  String type;
   
-  FluidParticle(PVector p, color C, float s) {
+  FluidParticle(PVector p, color C, float s, float d, String t) {
     this.pos = new PVector(p.x, p.y);
     this.velocity = new PVector(0, 0);
     this.size = s;
     this.c = C;
-    this.againstBoundary = new boolean[3];
+    this.density = d;
+    this.type = t;
   } //<>//
   
   void setVelocity(float x, float y) {

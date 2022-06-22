@@ -1,7 +1,19 @@
 void mousePressed() {
+  /* 
+  
+  selectedLiquid = -1: Deleting Liquid
+  selectedLiquid = 0: Not in Adding Liquid Mode
+  selectedLiquid = 1: Adding Water
+  selectedLiquid = 2: Adding Honey
+  selectedLiquid = 3: Adding Red Water
+  
+  */
+  
+  
   if (selectedLiquid > 0) addingLiquid = true;
   if (selectedLiquid < 0) deletingLiquid = true;
   if (blockMakerMode) {
+    // Checks if the mouse clicked on a block
     for (Block b : s.blocks) {
       if (b.pos.x < mouseX && b.pos.x + b.size.x > mouseX && b.pos.y < mouseY && b.pos.y + b.size.y > mouseY) {
         b.pickedUp = true;
@@ -47,20 +59,50 @@ void keyPressed() {
     paused = !paused;
   }
   
-  if (key == 'a') {
-    println(s.fluidAmount);
+  if (key == 'q') {
+    userInputMode = ((userInputMode-1)+4)%4;
+    updateUserInputMode();
   }
   
-  if (key == 'w') {
-    println(deletingBlockMode);
-    println(s.blocks.size());
+  if (key == 'e') {
+    userInputMode = (userInputMode+1)%4;
+    updateUserInputMode();
   }
-  
-  if (key == 's') {
-    println("Total particles: " + ahh);
+}
+
+void mouseWheel(MouseEvent e) {
+  if (e.getCount() < 0) {
+    addLiquidAmount = min(addLiquidAmount+1, 20);
+  } else {
+    addLiquidAmount = max(addLiquidAmount-1, 0);
   }
-  
-  if (key == 'f') {
-    println("Framerate: " + frameRate + " fps");
+}
+
+void updateUserInputMode() {
+  switch (userInputMode) {
+    case 0:
+      selectedLiquid = 1;
+      blockMakerMode = false;
+      deletingBlockMode = false;
+      currentMode.setText("Current Mode: Adding Liquid");
+      break;
+    case 1:
+      selectedLiquid = -1;
+      blockMakerMode = false;
+      deletingBlockMode = false;
+      currentMode.setText("Current Mode: Deleting Liquid");
+      break;
+    case 2:
+      selectedLiquid = 0;
+      blockMakerMode = true;
+      deletingBlockMode = false;
+      currentMode.setText("Current Mode: Block Maker");
+      break;
+    case 3:
+      selectedLiquid = 0;
+      blockMakerMode = false;
+      deletingBlockMode = true;
+      currentMode.setText("Current Mode: Deleting Blocks");
+      break;
   }
 }

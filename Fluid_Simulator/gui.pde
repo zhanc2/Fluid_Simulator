@@ -27,33 +27,6 @@ public void shiftInputModeEvent(GButton source, GEvent event) { //_CODE_:shiftIn
   updateUserInputMode();
 } //_CODE_:shiftInputMode:794145:
 
-void updateUserInputMode() {
-  if (userInputMode == 0) {
-    deletingBlockMode = false;
-    selectedLiquid = 1;
-    blockMakerMode = false;
-    currentMode.setText("Current Mode: Adding Fluid");
-  }
-  else if (userInputMode == 2) {
-    selectedLiquid = 0;
-    deletingBlockMode = false;
-    blockMakerMode = true;
-    currentMode.setText("Current Mode: Adding Blocks");
-  }
-  else if (userInputMode == 1) {
-    selectedLiquid = -1;
-    deletingBlockMode = false;
-    blockMakerMode = false;
-    currentMode.setText("Current Mode: Deleting Fluid");
-  }
-  else if (userInputMode == 3) {
-    deletingBlockMode = true;
-    selectedLiquid = 0;
-    blockMakerMode = false;
-    currentMode.setText("Current Mode: Deleting Blocks");
-  }
-}
-
 public void resetButtonClick(GButton source, GEvent event) { //_CODE_:resetButton:853558:
   s = new Simulation(n/5);
   userInputMode = 0;
@@ -67,6 +40,22 @@ public void pauseButtonClick(GButton source, GEvent event) { //_CODE_:pauseButto
   else pauseButton.setText("Pause");
 } //_CODE_:pauseButton:971392:
 
+public void nextLiquidButtonClick(GButton source, GEvent event) { //_CODE_:nextLiquidButton:852493:
+  selectedLiquid = (selectedLiquid)%3 + 1;
+  if (selectedLiquid == 1) {
+    liquidTypeLabel.setText("Current Liquid: Water");
+  } else if (selectedLiquid == 2) {
+    liquidTypeLabel.setText("Current Liquid: Honey");
+  } else if (selectedLiquid == 3) {
+    liquidTypeLabel.setText("Current Liquid: Red Water");
+  }
+  s.selectedFluidType = s.fluids[selectedLiquid-1];
+} //_CODE_:nextLiquidButton:852493:
+
+public void simSpeedSliderChange(GSlider source, GEvent event) { //_CODE_:simSpeedSlider:435191:
+  fps = simSpeedSlider.getValueF();
+} //_CODE_:simSpeedSlider:435191:
+
 
 
 // Create all the GUI controls. 
@@ -76,33 +65,49 @@ public void createGUI(){
   G4P.setGlobalColorScheme(GCScheme.BLUE_SCHEME);
   G4P.setMouseOverEnabled(false);
   surface.setTitle("Sketch Window");
-  window1 = GWindow.getWindow(this, "Window title", 0, 0, 240, 240, JAVA2D);
+  window1 = GWindow.getWindow(this, "Window title", 0, 0, 240, 250, JAVA2D);
   window1.noLoop();
   window1.setActionOnClose(G4P.KEEP_OPEN);
   window1.addDrawHandler(this, "win_draw1");
-  addLiquidSlider = new GSlider(window1, 10, 100, 100, 40, 10.0);
+  addLiquidSlider = new GSlider(window1, 10, 150, 100, 40, 10.0);
   addLiquidSlider.setLimits(10.0, 0.5, 20.0);
   addLiquidSlider.setNumberFormat(G4P.DECIMAL, 0);
   addLiquidSlider.setOpaque(false);
   addLiquidSlider.addEventHandler(this, "addLiquidSliderEvent");
-  shiftInputMode = new GButton(window1, 120, 10, 80, 30);
+  shiftInputMode = new GButton(window1, 135, 10, 80, 30);
   shiftInputMode.setText("Next");
   shiftInputMode.addEventHandler(this, "shiftInputModeEvent");
-  currentMode = new GLabel(window1, 10, 5, 100, 40);
+  currentMode = new GLabel(window1, 25, 5, 100, 40);
   currentMode.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
   currentMode.setText("Current Mode: Adding Liquid");
   currentMode.setOpaque(false);
-  liquidAddAmountLabel = new GLabel(window1, 20, 70, 80, 30);
+  liquidAddAmountLabel = new GLabel(window1, 20, 120, 80, 30);
   liquidAddAmountLabel.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
   liquidAddAmountLabel.setText("Amount of Liquid to Add");
   liquidAddAmountLabel.setOpaque(false);
-  resetButton = new GButton(window1, 20, 165, 80, 30);
+  resetButton = new GButton(window1, 20, 205, 80, 30);
   resetButton.setTextAlign(GAlign.CENTER, GAlign.CENTER);
   resetButton.setText("Reset");
   resetButton.addEventHandler(this, "resetButtonClick");
-  pauseButton = new GButton(window1, 140, 165, 80, 30);
+  pauseButton = new GButton(window1, 140, 205, 80, 30);
   pauseButton.setText("Pause");
   pauseButton.addEventHandler(this, "pauseButtonClick");
+  liquidTypeLabel = new GLabel(window1, 25, 60, 100, 40);
+  liquidTypeLabel.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
+  liquidTypeLabel.setText("Current Liquid: Water");
+  liquidTypeLabel.setOpaque(false);
+  nextLiquidButton = new GButton(window1, 135, 65, 80, 30);
+  nextLiquidButton.setText("Next");
+  nextLiquidButton.addEventHandler(this, "nextLiquidButtonClick");
+  simSpeedLabel = new GLabel(window1, 140, 120, 80, 30);
+  simSpeedLabel.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
+  simSpeedLabel.setText("Speed Of Simulation:");
+  simSpeedLabel.setOpaque(false);
+  simSpeedSlider = new GSlider(window1, 130, 150, 100, 40, 10.0);
+  simSpeedSlider.setLimits(60, 10, 60);
+  simSpeedSlider.setNumberFormat(G4P.INTEGER, 0);
+  simSpeedSlider.setOpaque(false);
+  simSpeedSlider.addEventHandler(this, "simSpeedSliderChange");
   window1.loop();
 }
 
@@ -115,3 +120,7 @@ GLabel currentMode;
 GLabel liquidAddAmountLabel; 
 GButton resetButton; 
 GButton pauseButton; 
+GLabel liquidTypeLabel; 
+GButton nextLiquidButton; 
+GLabel simSpeedLabel; 
+GSlider simSpeedSlider; 
